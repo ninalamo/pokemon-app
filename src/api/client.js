@@ -24,14 +24,36 @@ export const fetchPlayerState = async (playerId = 1) => {
 };
 
 export const savePlayerState = async (state) => {
-    if (MODE === 'local') return state; // Don't persist in local mode
-    const method = state.id ? 'PUT' : 'POST';
-    const url = state.id ? `${API_URL}/playerState/${state.id}` : `${API_URL}/playerState`;
+    if (MODE === 'local') return state;
 
-    const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(state)
-    });
-    return res.json();
+    console.log("Attempting to save state:", state);
+
+    try {
+        // First try to PUT (update existing)
+        let res = await fetch(`${API_URL}/playerState/${state.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(state)
+        });
+
+        // If we get a 404, it means it doesn't exist, so we POST instead
+        if (res.status === 404) {
+            console.log("Save not found, creating new state...");
+            res = await fetch(`${API_URL}/playerState`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(state)
+            });
+        }
+
+        if (!res.ok) throw new Error(`API error: ${res.status}`);
+
+        const data = await res.json();
+        console.log("Successfully saved state:", data);
+        return data;
+    } catch (error) {
+        console.error("Failed to save player state:", error);
+        // Even if API fails, we return the state so the game can continue in-memory
+        return state;
+    }
 };

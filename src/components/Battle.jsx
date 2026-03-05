@@ -14,8 +14,8 @@ const Battle = ({ player, setPlayer, battle, setBattle, setGameState }) => {
         }
     }, [turn, player, battle, setPlayer, setBattle]);
 
-    const handleAction = (type) => {
-        const result = battleAction(type, player, battle, setPlayer, setBattle);
+    const handleAction = (action) => {
+        const result = battleAction(action, player, battle, setPlayer, setBattle);
         if (result === 'escaped') {
             setGameState('overworld');
         } else {
@@ -33,16 +33,24 @@ const Battle = ({ player, setPlayer, battle, setBattle, setGameState }) => {
         );
     }
 
+    const { selectedPokemon } = player;
+
     return (
         <div className="battle-screen">
             <div className="battle-entities">
-                <div className="entity-info">
-                    <h3>{enemy.name}</h3>
-                    <p>HP: {enemy.hp} / {enemy.maxHp}</p>
+                <div className="entity-info enemy-entity">
+                    <div className="health-bar-container">
+                        <h3>{enemy.name}</h3>
+                        <p>HP: {enemy.hp} / {enemy.maxHp}</p>
+                    </div>
+                    {enemy.frontSprite && <img src={enemy.frontSprite} alt={enemy.name} className="sprite enemy-sprite" />}
                 </div>
-                <div className="entity-info">
-                    <h3>Player</h3>
-                    <p>HP: {player.hp} / {player.maxHp}</p>
+                <div className="entity-info player-entity">
+                    {selectedPokemon.backSprite && <img src={selectedPokemon.backSprite} alt={selectedPokemon.name} className="sprite player-sprite" />}
+                    <div className="health-bar-container">
+                        <h3>{selectedPokemon.name}</h3>
+                        <p>HP: {player.hp} / {player.maxHp}</p>
+                    </div>
                 </div>
             </div>
 
@@ -50,7 +58,11 @@ const Battle = ({ player, setPlayer, battle, setBattle, setGameState }) => {
                 {logs.map((l, i) => <p key={i}>{l}</p>)}
             </div>
 
-            <BattleMenu onAction={handleAction} disabled={turn !== 'player'} />
+            <BattleMenu
+                skills={selectedPokemon.skills}
+                onAction={handleAction}
+                disabled={turn !== 'player'}
+            />
         </div>
     );
 };

@@ -1,12 +1,18 @@
 import React from 'react';
 
-const BattleMenu = ({ onAction, disabled }) => {
+const BattleMenu = ({ skills, onAction, disabled }) => {
     return (
-        <div className="battle-menu">
-            <button onClick={() => onAction('attack')} disabled={disabled}>Attack</button>
-            <button onClick={() => onAction('defend')} disabled={disabled}>Defend</button>
-            <button onClick={() => onAction('skill')} disabled={disabled}>Skill</button>
-            <button onClick={() => onAction('run')} disabled={disabled}>Run</button>
+        <div className="battle-menu" style={{ gridTemplateColumns: '1fr 1fr' }}>
+            {skills.map((skill, i) => (
+                <button
+                    key={i}
+                    onClick={() => onAction({ type: 'skill', skill })}
+                    disabled={disabled}
+                >
+                    {skill.name} ({skill.type})
+                </button>
+            ))}
+            <button onClick={() => onAction({ type: 'run' })} disabled={disabled}>Run</button>
         </div>
     );
 };

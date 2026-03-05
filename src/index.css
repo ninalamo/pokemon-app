@@ -81,23 +81,41 @@ body {
 }
 
 .battle-screen {
-    width: 500px;
-    background: #222;
-    border: 4px solid #fff;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+  width: 600px;
+  background: #222;
+  border: 4px solid #fff;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .battle-entities {
-    display: flex;
-    justify-content: space-between;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .entity-info {
-    text-align: center;
-    flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.sprite {
+  width: 150px;
+  height: 150px;
+  image-rendering: pixelated;
+}
+
+.health-bar-container {
+  text-align: center;
+  background: rgba(0,0,0,0.5);
+  padding: 5px 15px;
+  border-radius: 8px;
+  border: 2px solid #555;
+  width: 80%;
 }
 
 .logs {
@@ -138,6 +156,47 @@ button:disabled {
 }
 
 .game-over h1 {
-    font-size: 4rem;
-    color: red;
+  font-size: 4rem;
+  color: red;
+}
+
+/* Pokemon Selection Screen */
+.selection-screen {
+  text-align: center;
+  background: rgba(0,0,0,0.8);
+  padding: 40px;
+  border-radius: 20px;
+  border: 4px solid #fbd000;
+  box-shadow: 0 0 30px rgba(251, 208, 0, 0.3);
+}
+
+.pokemon-card {
+  background: #333;
+  border: 2px solid #555;
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.pokemon-card:hover {
+  background: #444;
+  border-color: #fbd000;
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+}
+
+.pokemon-card h3 {
+  margin: 0;
+  color: #fff;
+}
+
+.pokemon-card img {
+  width: 120px;
+  height: 120px;
+  image-rendering: pixelated;
 }

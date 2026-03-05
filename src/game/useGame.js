@@ -1,20 +1,23 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { generateMap, getRandomSpawn, MAP_SIZE, TERRAIN } from './generateMap';
 import { shouldTriggerEncounter } from './encounter';
-import { ENEMIES } from './enemies';
-import { fetchPlayerState, savePlayerState } from '../api/client';
+import { fetchPlayerState, savePlayerState, fetchPokemon } from '../api/client';
 
 export const useGame = () => {
     const worldMap = useMemo(() => generateMap(), []);
     const initialPos = useMemo(() => getRandomSpawn(worldMap), [worldMap]);
 
+    const [allPokemon, setAllPokemon] = useState([]);
     const [player, setPlayer] = useState(null);
     const [gameState, setGameState] = useState('loading'); // 'loading', 'selection', 'overworld', 'battle', 'gameover'
     const [battle, setBattle] = useState(null);
 
     useEffect(() => {
-        // Attempt to load existing save
-        fetchPlayerState(1).then(savedState => {
+        // Fetch wild pokemon list for encounters, then attempt to load existing save
+        fetchPokemon().then(pokemonList => {
+            setAllPokemon(pokemonList);
+            return fetchPlayerState(1);
+        }).then(savedState => {
             if (savedState) {
                 setPlayer(savedState);
                 setGameState('overworld');
@@ -25,6 +28,7 @@ export const useGame = () => {
     }, []);
 
     const selectStarter = async (pokemon) => {
+        console.log("Selecting starter:", pokemon);
         const newState = {
             id: 1, // hardcoded for single player for now
             x: initialPos.x,
@@ -33,9 +37,17 @@ export const useGame = () => {
             maxHp: pokemon.maxHp,
             selectedPokemon: pokemon
         };
-        await savePlayerState(newState);
-        setPlayer(newState);
-        setGameState('overworld');
+        try {
+            await savePlayerState(newState);
+            console.log("Starter selection saved, transitioning to overworld.");
+            setPlayer(newState);
+            setGameState('overworld');
+        } catch (err) {
+            console.error("Error in selectStarter:", err);
+            // Fallback anyway so the game is playable
+            setPlayer(newState);
+            setGameState('overworld');
+        }
     };
 
     const move = useCallback((dx, dy) => {
@@ -50,19 +62,19 @@ export const useGame = () => {
         if (terrain === TERRAIN.WATER || terrain === TERRAIN.MOUNTAIN) return;
 
         setPlayer(prev => ({ ...prev, x: nx, y: ny }));
-        // Note: we should auto-save here, but we will leave it to the user or later batch
+        // Note: we can trigger a save in the background if we want, but omitting to prevent lag on every step.
 
-        if (shouldTriggerEncounter(terrain)) {
-            const enemyBase = ENEMIES[Math.floor(Math.random() * ENEMIES.length)];
+        if (shouldTriggerEncounter(terrain) && allPokemon.length > 0) {
+            // Pick random Pokemon for encounter
+            const enemyBase = allPokemon[Math.floor(Math.random() * allPokemon.length)];
             setBattle({
                 enemy: { ...enemyBase, hp: enemyBase.maxHp },
                 logs: [`A wild ${enemyBase.name} appeared!`],
-                turn: 'player',
-                playerDefending: false
+                turn: 'player'
             });
             setGameState('battle');
         }
-    }, [player, worldMap, gameState]);
+    }, [player, worldMap, gameState, allPokemon]);
 
     return { worldMap, player, setPlayer, gameState, setGameState, battle, setBattle, move, selectStarter };
 };

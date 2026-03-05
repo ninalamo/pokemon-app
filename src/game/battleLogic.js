@@ -1,22 +1,14 @@
-export const battleAction = (type, player, battle, setPlayer, setBattle) => {
+export const battleAction = (action, player, battle, setPlayer, setBattle) => {
     const { enemy } = battle;
     let newLogs = [];
     let nextTurn = 'enemy';
     let nextEnemy = { ...enemy };
-    let nextPD = false;
 
-    if (type === 'attack') {
-        const damage = player.attack;
+    if (action.type === 'skill') {
+        const damage = action.skill.damage;
         nextEnemy.hp -= damage;
-        newLogs.unshift(`Player attacks ${enemy.name} for ${damage} damage!`);
-    } else if (type === 'defend') {
-        nextPD = true;
-        newLogs.unshift(`Player defends!`);
-    } else if (type === 'skill') {
-        const damage = player.attack * 2;
-        nextEnemy.hp -= damage;
-        newLogs.unshift(`Player uses Skill! ${enemy.name} takes ${damage} damage!`);
-    } else if (type === 'run') {
+        newLogs.unshift(`${player.selectedPokemon.name} uses ${action.skill.name} for ${damage} damage!`);
+    } else if (action.type === 'run') {
         if (Math.random() > 0.5) {
             return 'escaped';
         } else {
@@ -26,26 +18,34 @@ export const battleAction = (type, player, battle, setPlayer, setBattle) => {
 
     if (nextEnemy.hp <= 0) {
         nextEnemy.hp = 0;
-        newLogs.unshift(`${enemy.name} was defeated!`);
+        newLogs.unshift(`Wild ${enemy.name} fainted!`);
+        // Basic encounter won tracking could live here
         return { ...battle, enemy: nextEnemy, logs: [...newLogs, ...battle.logs], turn: 'win' };
     }
 
-    return { ...battle, enemy: nextEnemy, logs: [...newLogs, ...battle.logs], turn: nextTurn, playerDefending: nextPD };
+    return { ...battle, enemy: nextEnemy, logs: [...newLogs, ...battle.logs], turn: nextTurn };
 };
 
 export const enemyTurn = (player, battle, setPlayer, setBattle) => {
-    const { enemy, playerDefending } = battle;
-    let damage = enemy.attack;
-    if (playerDefending) damage = Math.floor(damage / 2);
+    const { enemy } = battle;
+
+    // Enemy uses a random skill if they have them, else basic attack
+    let skillName = "Attack";
+    let damage = 10;
+
+    if (enemy.skills && enemy.skills.length > 0) {
+        const randomSkill = enemy.skills[Math.floor(Math.random() * enemy.skills.length)];
+        skillName = randomSkill.name;
+        damage = randomSkill.damage;
+    }
 
     const newPlayerHp = Math.max(0, player.hp - damage);
-    const log = `${enemy.name} attacks! Player takes ${damage} damage!`;
+    const log = `Wild ${enemy.name} uses ${skillName}! ${player.selectedPokemon.name} takes ${damage} damage!`;
 
     setPlayer(p => ({ ...p, hp: newPlayerHp }));
     setBattle(b => ({
         ...b,
         logs: [log, ...b.logs],
         turn: newPlayerHp <= 0 ? 'loss' : 'player',
-        playerDefending: false
     }));
 };
