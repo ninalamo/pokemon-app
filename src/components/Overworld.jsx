@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import Tile from './Tile';
 import { MAP_SIZE } from '../game/generateMap';
+import HUD from './HUD';
 
 const Overworld = ({ worldMap, player, move }) => {
     const VIEWPORT_SIZE = 9;
@@ -39,6 +40,7 @@ const Overworld = ({ worldMap, player, move }) => {
 
     return (
         <div className="overworld-container">
+            <HUD player={player} />
             <div className="viewport-grid">
                 {tiles}
             </div>

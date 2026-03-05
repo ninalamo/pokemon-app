@@ -1,3 +1,8 @@
+const getTimestamp = () => {
+    const now = new Date();
+    return `[${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}] `;
+};
+
 export const battleAction = (action, player, battle, setPlayer, setBattle) => {
     const { enemy } = battle;
     let newLogs = [];
@@ -7,18 +12,18 @@ export const battleAction = (action, player, battle, setPlayer, setBattle) => {
     if (action.type === 'skill') {
         const damage = action.skill.damage;
         nextEnemy.hp -= damage;
-        newLogs.unshift(`${player.selectedPokemon.name} uses ${action.skill.name} for ${damage} damage!`);
+        newLogs.unshift(`${getTimestamp()}${player.selectedPokemon.name} uses ${action.skill.name} for ${damage} damage!`);
     } else if (action.type === 'run') {
         if (Math.random() > 0.5) {
             return 'escaped';
         } else {
-            newLogs.unshift(`Failed to escape!`);
+            newLogs.unshift(`${getTimestamp()}Failed to escape!`);
         }
     }
 
     if (nextEnemy.hp <= 0) {
         nextEnemy.hp = 0;
-        newLogs.unshift(`Wild ${enemy.name} fainted!`);
+        newLogs.unshift(`${getTimestamp()}Wild ${enemy.name} fainted!`);
         // Basic encounter won tracking could live here
         return { ...battle, enemy: nextEnemy, logs: [...newLogs, ...battle.logs], turn: 'win' };
     }
@@ -40,7 +45,7 @@ export const enemyTurn = (player, battle, setPlayer, setBattle) => {
     }
 
     const newPlayerHp = Math.max(0, player.hp - damage);
-    const log = `Wild ${enemy.name} uses ${skillName}! ${player.selectedPokemon.name} takes ${damage} damage!`;
+    const log = `${getTimestamp()}Wild ${enemy.name} uses ${skillName}! ${player.selectedPokemon.name} takes ${damage} damage!`;
 
     setPlayer(p => ({ ...p, hp: newPlayerHp }));
     setBattle(b => ({

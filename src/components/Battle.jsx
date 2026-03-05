@@ -25,10 +25,29 @@ const Battle = ({ player, setPlayer, battle, setBattle, setGameState }) => {
 
     if (turn === 'win') {
         return (
-            <div className="battle-screen">
-                <h2>Victory!</h2>
-                <div className="logs">{logs.map((l, i) => <p key={i}>{l}</p>)}</div>
-                <button onClick={() => setGameState('overworld')}>Return</button>
+            <div className="battle-screen end-screen victory">
+                <div className="end-content">
+                    <h1>VICTORY!</h1>
+                    <img src={enemy.frontSprite} alt="fainted" style={{ filter: 'grayscale(1) brightness(0.5)', width: '100px' }} />
+                    <p>Wild {enemy.name} was defeated!</p>
+                    <div className="logs-summary">
+                        {logs.slice(0, 3).map((l, i) => <p key={i}>{l}</p>)}
+                    </div>
+                    <button className="primary-button" onClick={() => setGameState('overworld')}>Continue Adventure</button>
+                </div>
+            </div>
+        );
+    }
+
+    if (turn === 'loss') {
+        return (
+            <div className="battle-screen end-screen defeat">
+                <div className="end-content">
+                    <h1>DEFEATED...</h1>
+                    <img src={selectedPokemon.frontSprite} alt="fainted" style={{ filter: 'grayscale(1) brightness(0.5)', width: '100px' }} />
+                    <p>{selectedPokemon.name} fainted!</p>
+                    <button className="primary-button" onClick={() => setGameState('gameover')}>End Journey</button>
+                </div>
             </div>
         );
     }
