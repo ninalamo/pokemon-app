@@ -109,6 +109,25 @@ body {
   image-rendering: pixelated;
 }
 
+.flipped {
+  transform: scaleX(-1);
+}
+
+.entity-label {
+  font-size: 0.7rem;
+  color: #fbd000;
+  font-weight: bold;
+  letter-spacing: 2px;
+  margin-bottom: 5px;
+}
+
+.battle-vs {
+  font-style: italic;
+  font-weight: bold;
+  color: #555;
+  font-size: 1.5rem;
+}
+
 .health-bar-container {
   text-align: center;
   background: rgba(0,0,0,0.5);

@@ -57,19 +57,26 @@ const Battle = ({ player, setPlayer, battle, setBattle, setGameState }) => {
     return (
         <div className="battle-screen">
             <div className="battle-entities">
+                {/* Player on the Left */}
+                <div className="entity-info player-entity">
+                    <span className="entity-label">YOUR POKEMON</span>
+                    <div className="health-bar-container">
+                        <h3>{selectedPokemon.name}</h3>
+                        <p>HP: {player.hp} / {player.maxHp}</p>
+                    </div>
+                    {selectedPokemon.frontSprite && <img src={selectedPokemon.frontSprite} alt={selectedPokemon.name} className="sprite player-sprite flipped" />}
+                </div>
+
+                <div className="battle-vs">VS</div>
+
+                {/* Enemy on the Right */}
                 <div className="entity-info enemy-entity">
+                    <span className="entity-label">WILD POKEMON</span>
                     <div className="health-bar-container">
                         <h3>{enemy.name}</h3>
                         <p>HP: {enemy.hp} / {enemy.maxHp}</p>
                     </div>
                     {enemy.frontSprite && <img src={enemy.frontSprite} alt={enemy.name} className="sprite enemy-sprite" />}
-                </div>
-                <div className="entity-info player-entity">
-                    {selectedPokemon.backSprite && <img src={selectedPokemon.backSprite} alt={selectedPokemon.name} className="sprite player-sprite" />}
-                    <div className="health-bar-container">
-                        <h3>{selectedPokemon.name}</h3>
-                        <p>HP: {player.hp} / {player.maxHp}</p>
-                    </div>
                 </div>
             </div>
 
