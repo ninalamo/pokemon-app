@@ -1,0 +1,143 @@
+:root {
+    --tile-size: 50px;
+    --bg-color: #1a1a1a;
+    --text-color: #eee;
+    --grass: #2d5a27;
+    --forest: #1b3519;
+    --mountain: #4a4a4a;
+    --water: #2a4d69;
+    --town: #8b4513;
+    --hero: #ffed00;
+    --enemy: #ff0000;
+}
+
+body {
+    margin: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+#root {
+    width: 100%;
+    height: 100%;
+}
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.overworld-container {
+    border: 4px solid #333;
+    padding: 5px;
+    background: #000;
+}
+
+.viewport-grid {
+    display: grid;
+    grid-template-columns: repeat(9, var(--tile-size));
+    grid-template-rows: repeat(9, var(--tile-size));
+}
+
+.tile {
+    width: var(--tile-size);
+    height: var(--tile-size);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 0.1px solid rgba(255, 255, 255, 0.05);
+}
+
+.tile-grass {
+    background-color: var(--grass);
+}
+.tile-forest {
+    background-color: var(--forest);
+}
+.tile-mountain {
+    background-color: var(--mountain);
+}
+.tile-water {
+    background-color: var(--water);
+}
+.tile-town {
+    background-color: var(--town);
+}
+
+.hero {
+    width: 70%;
+    height: 70%;
+    background-color: var(--hero);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--hero);
+}
+
+.battle-screen {
+    width: 500px;
+    background: #222;
+    border: 4px solid #fff;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.battle-entities {
+    display: flex;
+    justify-content: space-between;
+}
+
+.entity-info {
+    text-align: center;
+    flex: 1;
+}
+
+.logs {
+    height: 150px;
+    background: #000;
+    overflow-y: auto;
+    padding: 10px;
+    border: 2px solid #555;
+    font-size: 0.9rem;
+}
+
+.battle-menu {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+button {
+    padding: 10px;
+    background: #444;
+    color: white;
+    border: 2px solid #888;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+button:hover:not(:disabled) {
+    background: #666;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.game-over {
+    text-align: center;
+}
+
+.game-over h1 {
+    font-size: 4rem;
+    color: red;
+}
