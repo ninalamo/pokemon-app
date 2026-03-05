@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import BattleMenu from './BattleMenu';
 import { battleAction, enemyTurn } from '../game/battleLogic';
 
-const Battle = ({ player, setPlayer, battle, setBattle, setGameState }) => {
+const Battle = ({ player, setPlayer, battle, setBattle, setGameState, handleBattleEnd }) => {
     const { enemy, logs, turn } = battle;
 
     useEffect(() => {
@@ -18,6 +18,8 @@ const Battle = ({ player, setPlayer, battle, setBattle, setGameState }) => {
         const result = battleAction(action, player, battle, setPlayer, setBattle);
         if (result === 'escaped') {
             setGameState('overworld');
+        } else if (result.turn === 'win') {
+            setBattle(result);
         } else {
             setBattle(result);
         }
@@ -31,9 +33,9 @@ const Battle = ({ player, setPlayer, battle, setBattle, setGameState }) => {
                     <img src={enemy.frontSprite} alt="fainted" style={{ filter: 'grayscale(1) brightness(0.5)', width: '100px' }} />
                     <p>Wild {enemy.name} was defeated!</p>
                     <div className="logs-summary">
-                        {logs.slice(0, 3).map((l, i) => <p key={i}>{l}</p>)}
+                        {logs.slice(-3).map((l, i) => <p key={i}>{l}</p>)}
                     </div>
-                    <button className="primary-button" onClick={() => setGameState('overworld')}>Continue Adventure</button>
+                    <button className="primary-button" onClick={() => handleBattleEnd({ type: 'win', xpGain: battle.xpGain })}>Continue Adventure</button>
                 </div>
             </div>
         );
@@ -52,6 +54,12 @@ const Battle = ({ player, setPlayer, battle, setBattle, setGameState }) => {
         );
     }
 
+    const logEndRef = useRef(null);
+
+    useEffect(() => {
+        logEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [logs]);
+
     const { selectedPokemon } = player;
 
     return (
@@ -61,7 +69,7 @@ const Battle = ({ player, setPlayer, battle, setBattle, setGameState }) => {
                 <div className="entity-info player-entity">
                     <span className="entity-label">YOUR POKEMON</span>
                     <div className="health-bar-container">
-                        <h3>{selectedPokemon.name}</h3>
+                        <h3>{selectedPokemon.name} <span className="lvl-tag">Lvl {player.level}</span></h3>
                         <p>HP: {player.hp} / {player.maxHp}</p>
                     </div>
                     {selectedPokemon.frontSprite && <img src={selectedPokemon.frontSprite} alt={selectedPokemon.name} className="sprite player-sprite flipped" />}
@@ -73,7 +81,7 @@ const Battle = ({ player, setPlayer, battle, setBattle, setGameState }) => {
                 <div className="entity-info enemy-entity">
                     <span className="entity-label">WILD POKEMON</span>
                     <div className="health-bar-container">
-                        <h3>{enemy.name}</h3>
+                        <h3>{enemy.name} <span className="lvl-tag">Lvl {enemy.level}</span></h3>
                         <p>HP: {enemy.hp} / {enemy.maxHp}</p>
                     </div>
                     {enemy.frontSprite && <img src={enemy.frontSprite} alt={enemy.name} className="sprite enemy-sprite" />}
@@ -82,6 +90,7 @@ const Battle = ({ player, setPlayer, battle, setBattle, setGameState }) => {
 
             <div className="logs">
                 {logs.map((l, i) => <p key={i}>{l}</p>)}
+                <div ref={logEndRef} />
             </div>
 
             <BattleMenu

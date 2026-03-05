@@ -15,7 +15,10 @@ const HUD = ({ player }) => {
             <div className="hud-pokemon-info">
                 <img src={selectedPokemon.frontSprite} alt={selectedPokemon.name} className="hud-sprite" />
                 <div className="hud-stats">
-                    <span className="hud-name">{selectedPokemon.name}</span>
+                    <div className="hud-header">
+                        <span className="hud-name">{selectedPokemon.name}</span>
+                        <span className="hud-level">LVL {player.level}</span>
+                    </div>
                     <div className="hud-hp-container">
                         <div
                             className="hud-hp-bar"
@@ -25,7 +28,10 @@ const HUD = ({ player }) => {
                             }}
                         />
                     </div>
-                    <span className="hud-hp-text">{hp} / {maxHp} HP</span>
+                    <div className="hud-sub-stats">
+                        <span className="hud-hp-text">{hp} / {maxHp} HP</span>
+                        <span className="hud-xp-text">XP: {player.experience} / {player.level * 100}</span>
+                    </div>
                 </div>
             </div>
             <div className="hud-location">

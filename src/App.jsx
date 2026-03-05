@@ -15,7 +15,8 @@ function App() {
         battle,
         setBattle,
         move,
-        selectStarter
+        selectStarter,
+        handleBattleEnd
     } = useGame();
 
     const handleRestart = () => {
@@ -43,6 +44,7 @@ function App() {
                     battle={battle}
                     setBattle={setBattle}
                     setGameState={setGameState}
+                    handleBattleEnd={handleBattleEnd}
                 />
             )}
 

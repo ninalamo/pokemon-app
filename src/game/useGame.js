@@ -9,42 +9,46 @@ export const useGame = () => {
 
     const [allPokemon, setAllPokemon] = useState([]);
     const [player, setPlayer] = useState(null);
-    const [gameState, setGameState] = useState('loading'); // 'loading', 'selection', 'overworld', 'battle', 'gameover'
+    const [gameState, setGameState] = useState('loading');
     const [battle, setBattle] = useState(null);
+    const [stepsSinceLast, setStepsSinceLast] = useState(0);
 
     useEffect(() => {
-        // Fetch wild pokemon list for encounters, then attempt to load existing save
         fetchPokemon().then(pokemonList => {
             setAllPokemon(pokemonList);
             return fetchPlayerState(1);
         }).then(savedState => {
             if (savedState) {
-                setPlayer(savedState);
+                // Ensure new fields exist for legacy saves
+                setPlayer({
+                    level: 1,
+                    experience: 0,
+                    ...savedState
+                });
                 setGameState('overworld');
             } else {
-                setGameState('selection'); // No save found, go to starter selection
+                setGameState('selection');
             }
         });
     }, []);
 
     const selectStarter = async (pokemon) => {
-        console.log("Selecting starter:", pokemon);
         const newState = {
-            id: 1, // hardcoded for single player for now
+            id: 1,
             x: initialPos.x,
             y: initialPos.y,
             hp: pokemon.maxHp,
             maxHp: pokemon.maxHp,
+            level: 1,
+            experience: 0,
             selectedPokemon: pokemon
         };
+        // ... rest of selectStarter ...
         try {
             await savePlayerState(newState);
-            console.log("Starter selection saved, transitioning to overworld.");
             setPlayer(newState);
             setGameState('overworld');
         } catch (err) {
-            console.error("Error in selectStarter:", err);
-            // Fallback anyway so the game is playable
             setPlayer(newState);
             setGameState('overworld');
         }
@@ -61,20 +65,70 @@ export const useGame = () => {
         const terrain = worldMap[ny][nx];
         if (terrain === TERRAIN.WATER || terrain === TERRAIN.MOUNTAIN) return;
 
-        setPlayer(prev => ({ ...prev, x: nx, y: ny }));
-        // Note: we can trigger a save in the background if we want, but omitting to prevent lag on every step.
+        // HP Replenish: +1 HP per step
+        const newHp = Math.min(player.maxHp, player.hp + 1);
+        const newSteps = stepsSinceLast + 1;
 
-        if (shouldTriggerEncounter(terrain) && allPokemon.length > 0) {
-            // Pick random Pokemon for encounter
+        setPlayer(prev => ({ ...prev, x: nx, y: ny, hp: newHp }));
+        setStepsSinceLast(newSteps);
+
+        if (shouldTriggerEncounter(terrain, newSteps) && allPokemon.length > 0) {
             const enemyBase = allPokemon[Math.floor(Math.random() * allPokemon.length)];
+
+            // Random Enemy Level: player.level - 2 to player.level + 5
+            const minLvl = Math.max(1, player.level - 2);
+            const maxLvl = player.level + 5;
+            const enemyLevel = Math.floor(Math.random() * (maxLvl - minLvl + 1)) + minLvl;
+
+            // Scale enemy stats
+            const enemyHp = enemyBase.maxHp + (enemyLevel - 1) * 15;
+
             setBattle({
-                enemy: { ...enemyBase, hp: enemyBase.maxHp },
-                logs: [`A wild ${enemyBase.name} appeared!`],
+                enemy: {
+                    ...enemyBase,
+                    level: enemyLevel,
+                    hp: enemyHp,
+                    maxHp: enemyHp
+                },
+                logs: [`A wild ${enemyBase.name} (Lvl ${enemyLevel}) appeared!`],
                 turn: 'player'
             });
             setGameState('battle');
+            setStepsSinceLast(0);
         }
-    }, [player, worldMap, gameState, allPokemon]);
+    }, [player, worldMap, gameState, allPokemon, stepsSinceLast]);
 
-    return { worldMap, player, setPlayer, gameState, setGameState, battle, setBattle, move, selectStarter };
+    const handleBattleEnd = useCallback(async (result) => {
+        if (result.type === 'win') {
+            const xpGain = result.xpGain;
+            let newExp = player.experience + xpGain;
+            let newLevel = player.level;
+            let newMaxHp = player.maxHp;
+            let newHp = player.hp;
+
+            // Level Up logic: Level * 100
+            const xpNeeded = player.level * 100;
+            if (newExp >= xpNeeded) {
+                newExp -= xpNeeded;
+                newLevel += 1;
+                newMaxHp += 20; // +20 HP per level
+                newHp = newMaxHp; // Heal to full on level up
+                console.log(`Level Up! Now Level ${newLevel}`);
+            }
+
+            const updatedPlayer = {
+                ...player,
+                experience: newExp,
+                level: newLevel,
+                maxHp: newMaxHp,
+                hp: newHp
+            };
+
+            setPlayer(updatedPlayer);
+            await savePlayerState(updatedPlayer);
+        }
+        setGameState('overworld');
+    }, [player]);
+
+    return { worldMap, player, setPlayer, gameState, setGameState, battle, setBattle, move, selectStarter, handleBattleEnd };
 };
