@@ -6,12 +6,16 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "api": "json-server --watch db.json --port 3000"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.1.4",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "vite": "^7.3.1"
+  },
+  "devDependencies": {
+    "json-server": "^1.0.0-beta.12"
   }
 }

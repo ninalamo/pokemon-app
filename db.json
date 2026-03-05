@@ -1,0 +1,62 @@
+{
+    "pokemon": [
+        {
+            "id": 1,
+            "name": "Bulbasaur",
+            "maxHp": 45,
+            "frontSprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png",
+            "backSprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/1.png",
+            "skills": [
+                {
+                    "name": "Tackle",
+                    "damage": 10,
+                    "type": "Normal"
+                },
+                {
+                    "name": "Vine Whip",
+                    "damage": 15,
+                    "type": "Grass"
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "name": "Charmander",
+            "maxHp": 39,
+            "frontSprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png",
+            "backSprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/4.png",
+            "skills": [
+                {
+                    "name": "Scratch",
+                    "damage": 10,
+                    "type": "Normal"
+                },
+                {
+                    "name": "Ember",
+                    "damage": 15,
+                    "type": "Fire"
+                }
+            ]
+        },
+        {
+            "id": 7,
+            "name": "Squirtle",
+            "maxHp": 44,
+            "frontSprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png",
+            "backSprite": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/7.png",
+            "skills": [
+                {
+                    "name": "Tackle",
+                    "damage": 10,
+                    "type": "Normal"
+                },
+                {
+                    "name": "Water Gun",
+                    "damage": 15,
+                    "type": "Water"
+                }
+            ]
+        }
+    ],
+    "playerState": []
+}
