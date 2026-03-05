@@ -14,42 +14,51 @@ export const useGame = () => {
     const [stepsSinceLast, setStepsSinceLast] = useState(0);
 
     useEffect(() => {
-        fetchPokemon().then(pokemonList => {
-            setAllPokemon(pokemonList);
-            return fetchPlayerState(1);
-        }).then(savedState => {
-            if (savedState) {
-                // Ensure new fields exist for legacy saves
-                let team = savedState.pokemonTeam;
-                let activeIndex = savedState.activePokemonIndex !== undefined ? savedState.activePokemonIndex : 0;
+        const loadGameData = async () => {
+            try {
+                const pokemonList = await fetchPokemon();
+                setAllPokemon(pokemonList);
 
-                if (!team) {
-                    // Upgrade legacy saves directly to the full 3-starter team
-                    team = pokemonList.map(p => ({
-                        ...p,
-                        hp: p.maxHp,
-                        level: 1,
-                        experience: 0
-                    }));
-                    // Set active index to the one they previously selected (if we can find it)
-                    if (savedState.selectedPokemon) {
-                        const foundIndex = team.findIndex(p => p.id === savedState.selectedPokemon.id);
-                        if (foundIndex !== -1) activeIndex = foundIndex;
+                const savedState = await fetchPlayerState(1);
+
+                if (savedState) {
+                    // Ensure new fields exist for legacy saves
+                    let team = savedState.pokemonTeam;
+                    let activeIndex = savedState.activePokemonIndex !== undefined ? savedState.activePokemonIndex : 0;
+
+                    if (!team) {
+                        // Upgrade legacy saves directly to the full 3-starter team
+                        team = pokemonList.map(p => ({
+                            ...p,
+                            hp: p.maxHp,
+                            level: 1,
+                            experience: 0
+                        }));
+                        // Set active index to the one they previously selected (if we can find it)
+                        if (savedState.selectedPokemon) {
+                            const foundIndex = team.findIndex(p => p.id === savedState.selectedPokemon.id);
+                            if (foundIndex !== -1) activeIndex = foundIndex;
+                        }
                     }
-                }
 
-                setPlayer({
-                    ...savedState, // keeps x, y, id mostly
-                    level: 1, // legacy fields, kept for safety 
-                    experience: 0,
-                    pokemonTeam: team,
-                    activePokemonIndex: activeIndex,
-                });
-                setGameState('overworld');
-            } else {
-                setGameState('selection');
+                    setPlayer({
+                        ...savedState, // keeps x, y, id mostly
+                        level: 1, // legacy fields, kept for safety 
+                        experience: 0,
+                        pokemonTeam: team,
+                        activePokemonIndex: activeIndex,
+                    });
+                    setGameState('overworld');
+                } else {
+                    setGameState('selection');
+                }
+            } catch (error) {
+                console.error("Failed to load game data:", error);
+                setGameState('selection'); // Fallback
             }
-        });
+        };
+
+        loadGameData();
     }, []);
 
     const selectStarter = async (pokemon) => {
