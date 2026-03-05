@@ -3,7 +3,7 @@ import Tile from './Tile';
 import { MAP_SIZE } from '../game/generateMap';
 import HUD from './HUD';
 
-const Overworld = ({ worldMap, player, move }) => {
+const Overworld = ({ worldMap, player, move, switchPokemon }) => {
     const VIEWPORT_SIZE = 9;
     const HALF_VIEWPORT = Math.floor(VIEWPORT_SIZE / 2);
 
@@ -40,7 +40,7 @@ const Overworld = ({ worldMap, player, move }) => {
 
     return (
         <div className="overworld-container">
-            <HUD player={player} />
+            <HUD player={player} onSwitch={switchPokemon} />
             <div className="viewport-grid">
                 {tiles}
             </div>

@@ -128,6 +128,64 @@ body {
   font-size: 1.5rem;
 }
 
+/* Switch Menu */
+.switch-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.switch-menu {
+  background: #222;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #444;
+  width: 300px;
+  text-align: center;
+}
+
+.switch-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.switch-options button {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: #333;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #444;
+  cursor: pointer;
+  width: 100%;
+}
+
+.switch-options button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.switch-options img {
+  width: 30px;
+  height: 30px;
+  image-rendering: px;
+}
+
+.cancel-button {
+  background: #a44 !important;
+  width: 100%;
+}
+
 .health-bar-container {
   text-align: center;
   background: rgba(0,0,0,0.5);
@@ -184,6 +242,59 @@ body {
 .hud-xp-text {
   font-size: 0.65rem;
   color: #888;
+}
+
+/* Team Tray */
+.hud-team-tray {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+.team-member-icon {
+  background: rgba(0, 0, 0, 0.7);
+  padding: 5px;
+  border-radius: 8px;
+  border: 2px solid rgba(255,255,255,0.1);
+  cursor: pointer;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.team-member-icon:hover {
+  transform: scale(1.1);
+  border-color: #fbd000;
+}
+
+.team-member-icon.active {
+  border-color: #fbd000;
+  box-shadow: 0 0 10px rgba(251, 208, 0, 0.5);
+}
+
+.team-member-icon img {
+  width: 35px;
+  height: 35px;
+  image-rendering: pixelated;
+}
+
+.mini-hp-bar {
+  width: 100%;
+  height: 4px;
+  background: #222;
+  border-radius: 2px;
+  margin-top: 2px;
+  overflow: hidden;
+}
+
+.mini-hp-bar div {
+  height: 100%;
+  background: #4caf50;
 }
 
 .battle-menu {

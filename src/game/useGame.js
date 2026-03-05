@@ -20,10 +20,30 @@ export const useGame = () => {
         }).then(savedState => {
             if (savedState) {
                 // Ensure new fields exist for legacy saves
+                let team = savedState.pokemonTeam;
+                let activeIndex = savedState.activePokemonIndex !== undefined ? savedState.activePokemonIndex : 0;
+
+                if (!team) {
+                    // Upgrade legacy saves directly to the full 3-starter team
+                    team = pokemonList.map(p => ({
+                        ...p,
+                        hp: p.maxHp,
+                        level: 1,
+                        experience: 0
+                    }));
+                    // Set active index to the one they previously selected (if we can find it)
+                    if (savedState.selectedPokemon) {
+                        const foundIndex = team.findIndex(p => p.id === savedState.selectedPokemon.id);
+                        if (foundIndex !== -1) activeIndex = foundIndex;
+                    }
+                }
+
                 setPlayer({
-                    level: 1,
+                    ...savedState, // keeps x, y, id mostly
+                    level: 1, // legacy fields, kept for safety 
                     experience: 0,
-                    ...savedState
+                    pokemonTeam: team,
+                    activePokemonIndex: activeIndex,
                 });
                 setGameState('overworld');
             } else {
@@ -33,17 +53,23 @@ export const useGame = () => {
     }, []);
 
     const selectStarter = async (pokemon) => {
+        // For the demo, we give all 3 starters but make the chosen one active
+        const team = allPokemon.map(p => ({
+            ...p,
+            hp: p.maxHp,
+            level: 1,
+            experience: 0
+        }));
+
+        const selectedIndex = team.findIndex(p => p.id === pokemon.id);
+
         const newState = {
             id: 1,
             x: initialPos.x,
             y: initialPos.y,
-            hp: pokemon.maxHp,
-            maxHp: pokemon.maxHp,
-            level: 1,
-            experience: 0,
-            selectedPokemon: pokemon
+            pokemonTeam: team,
+            activePokemonIndex: selectedIndex
         };
-        // ... rest of selectStarter ...
         try {
             await savePlayerState(newState);
             setPlayer(newState);
@@ -53,6 +79,11 @@ export const useGame = () => {
             setGameState('overworld');
         }
     };
+
+    const switchPokemon = useCallback((index) => {
+        if (gameState !== 'overworld' && gameState !== 'battle') return;
+        setPlayer(prev => ({ ...prev, activePokemonIndex: index }));
+    }, [gameState]);
 
     const move = useCallback((dx, dy) => {
         if (gameState !== 'overworld') return;
@@ -65,31 +96,31 @@ export const useGame = () => {
         const terrain = worldMap[ny][nx];
         if (terrain === TERRAIN.WATER || terrain === TERRAIN.MOUNTAIN) return;
 
-        // HP Replenish: +1 HP per step
-        const newHp = Math.min(player.maxHp, player.hp + 1);
-        const newSteps = stepsSinceLast + 1;
+        // Team-wide Healing: +1 HP per step for everyone
+        const updatedTeam = player.pokemonTeam.map(p => ({
+            ...p,
+            hp: Math.min(p.maxHp, p.hp + 1)
+        }));
 
-        setPlayer(prev => ({ ...prev, x: nx, y: ny, hp: newHp }));
-        setStepsSinceLast(newSteps);
+        setPlayer(prev => ({
+            ...prev,
+            x: nx,
+            y: ny,
+            pokemonTeam: updatedTeam
+        }));
+        setStepsSinceLast(prev => prev + 1);
 
-        if (shouldTriggerEncounter(terrain, newSteps) && allPokemon.length > 0) {
+        if (shouldTriggerEncounter(terrain, stepsSinceLast + 1) && allPokemon.length > 0) {
             const enemyBase = allPokemon[Math.floor(Math.random() * allPokemon.length)];
+            const activePoke = updatedTeam[player.activePokemonIndex];
 
-            // Random Enemy Level: player.level - 2 to player.level + 5
-            const minLvl = Math.max(1, player.level - 2);
-            const maxLvl = player.level + 5;
+            const minLvl = Math.max(1, activePoke.level - 2);
+            const maxLvl = activePoke.level + 5;
             const enemyLevel = Math.floor(Math.random() * (maxLvl - minLvl + 1)) + minLvl;
-
-            // Scale enemy stats
             const enemyHp = enemyBase.maxHp + (enemyLevel - 1) * 15;
 
             setBattle({
-                enemy: {
-                    ...enemyBase,
-                    level: enemyLevel,
-                    hp: enemyHp,
-                    maxHp: enemyHp
-                },
+                enemy: { ...enemyBase, level: enemyLevel, hp: enemyHp, maxHp: enemyHp },
                 logs: [`A wild ${enemyBase.name} (Lvl ${enemyLevel}) appeared!`],
                 turn: 'player'
             });
@@ -100,35 +131,36 @@ export const useGame = () => {
 
     const handleBattleEnd = useCallback(async (result) => {
         if (result.type === 'win') {
-            const xpGain = result.xpGain;
-            let newExp = player.experience + xpGain;
-            let newLevel = player.level;
-            let newMaxHp = player.maxHp;
-            let newHp = player.hp;
+            const activePoke = player.pokemonTeam[player.activePokemonIndex];
+            let newExp = activePoke.experience + result.xpGain;
+            let newLevel = activePoke.level;
+            let newMaxHp = activePoke.maxHp;
+            let newHp = activePoke.hp;
 
-            // Level Up logic: Level * 100
-            const xpNeeded = player.level * 100;
+            const xpNeeded = activePoke.level * 100;
             if (newExp >= xpNeeded) {
                 newExp -= xpNeeded;
                 newLevel += 1;
-                newMaxHp += 20; // +20 HP per level
-                newHp = newMaxHp; // Heal to full on level up
-                console.log(`Level Up! Now Level ${newLevel}`);
+                newMaxHp += 20;
+                newHp = newMaxHp;
+                console.log(`Level Up! ${activePoke.name} is now Level ${newLevel}`);
             }
 
-            const updatedPlayer = {
-                ...player,
+            const updatedTeam = [...player.pokemonTeam];
+            updatedTeam[player.activePokemonIndex] = {
+                ...activePoke,
                 experience: newExp,
                 level: newLevel,
                 maxHp: newMaxHp,
                 hp: newHp
             };
 
+            const updatedPlayer = { ...player, pokemonTeam: updatedTeam };
             setPlayer(updatedPlayer);
             await savePlayerState(updatedPlayer);
         }
         setGameState('overworld');
     }, [player]);
 
-    return { worldMap, player, setPlayer, gameState, setGameState, battle, setBattle, move, selectStarter, handleBattleEnd };
+    return { worldMap, player, setPlayer, gameState, setGameState, battle, setBattle, move, selectStarter, switchPokemon, handleBattleEnd };
 };

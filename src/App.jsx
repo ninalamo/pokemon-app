@@ -7,16 +7,10 @@ import PokemonSelection from './components/PokemonSelection';
 
 function App() {
     const {
-        worldMap,
-        player,
-        setPlayer,
-        gameState,
-        setGameState,
-        battle,
-        setBattle,
-        move,
-        selectStarter,
-        handleBattleEnd
+        worldMap, player, setPlayer,
+        gameState, setGameState,
+        battle, setBattle,
+        move, selectStarter, handleBattleEnd, switchPokemon
     } = useGame();
 
     const handleRestart = () => {
@@ -33,7 +27,7 @@ function App() {
                 <>
                     <h1>Overworld</h1>
                     <p>Use Arrow Keys to move</p>
-                    <Overworld worldMap={worldMap} player={player} move={move} />
+                    <Overworld worldMap={worldMap} player={player} move={move} switchPokemon={switchPokemon} />
                 </>
             )}
 
