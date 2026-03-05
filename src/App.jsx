@@ -3,6 +3,7 @@ import { useGame } from './game/useGame';
 import Overworld from './components/Overworld';
 import Battle from './components/Battle';
 import GameOver from './components/GameOver';
+import PokemonSelection from './components/PokemonSelection';
 
 function App() {
     const {
@@ -13,7 +14,8 @@ function App() {
         setGameState,
         battle,
         setBattle,
-        move
+        move,
+        selectStarter
     } = useGame();
 
     const handleRestart = () => {
@@ -22,7 +24,11 @@ function App() {
 
     return (
         <div className="app-container">
-            {gameState === 'overworld' && (
+            {gameState === 'loading' && <h2>Loading Game...</h2>}
+
+            {gameState === 'selection' && <PokemonSelection onSelect={selectStarter} />}
+
+            {gameState === 'overworld' && player && (
                 <>
                     <h1>Overworld</h1>
                     <p>Use Arrow Keys to move</p>
@@ -40,7 +46,7 @@ function App() {
                 />
             )}
 
-            {gameState === 'gameover' || player.hp <= 0 && (
+            {(gameState === 'gameover' || (player && player.hp <= 0 && gameState !== 'battle')) && (
                 <GameOver onRestart={handleRestart} />
             )}
         </div>
